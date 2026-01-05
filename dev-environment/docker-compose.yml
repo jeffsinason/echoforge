@@ -1,0 +1,56 @@
+# EchoForge Unified Development Infrastructure
+# Provides PostgreSQL and Redis for all services
+#
+# Usage:
+#   docker-compose up -d      # Start infrastructure
+#   docker-compose down       # Stop infrastructure
+#   docker-compose down -v    # Stop and remove volumes (DESTROYS DATA)
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: echoforge_dev_postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-echoforge_hub}
+      POSTGRES_USER: ${POSTGRES_USER:-echoforge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-echoforge_dev_2025}
+    ports:
+      - "${POSTGRES_PORT:-5435}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-echoforge} -d ${POSTGRES_DB:-echoforge_hub}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - echoforge_dev
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: echoforge_dev_redis
+    command: redis-server --appendonly yes
+    ports:
+      - "${REDIS_PORT:-6382}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - echoforge_dev
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    name: echoforge_dev_postgres_data
+  redis_data:
+    name: echoforge_dev_redis_data
+
+networks:
+  echoforge_dev:
+    name: echoforge_dev_network
+    driver: bridge

@@ -1,0 +1,6 @@
+[submodule "hub"]
+	path = hub
+	url = git@github.com:jeffsinason/echoforge-hub.git
+[submodule "agent"]
+	path = agent
+	url = git@github.com:jeffsinason/echoforge-agent.git

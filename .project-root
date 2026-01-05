@@ -1,0 +1,13 @@
+name: echoforge
+type: composite
+description: EchoForge AI Agent Platform
+github_repo: jeffsinason/echoforge
+components:
+  - name: hub
+    path: hub
+    repo: jeffsinason/echoforge-hub
+    description: Customer portal and management layer (Django)
+  - name: agent
+    path: agent
+    repo: jeffsinason/echoforge-agent
+    description: AI agent runtime engine (FastAPI)
