@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EchoForge Agent Test UI</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: #16213e;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #0f3460;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: #e94560;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4caf50;
+        }
+
+        .status-dot.error {
+            background: #f44336;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 1rem;
+            gap: 1rem;
+        }
+
+        .chat-panel {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            background: #16213e;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 1rem;
+            border-radius: 12px;
+            line-height: 1.5;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: #e94560;
+            color: white;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+            background: #0f3460;
+        }
+
+        .message.system {
+            align-self: center;
+            background: transparent;
+            color: #888;
+            font-size: 0.85rem;
+            padding: 0.5rem;
+        }
+
+        .message pre {
+            background: rgba(0,0,0,0.3);
+            padding: 0.5rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-top: 0.5rem;
+        }
+
+        .message code {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.85rem;
+        }
+
+        .message:not(:has(pre)) code {
+            background: rgba(0,0,0,0.3);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+        }
+
+        .message h2, .message h3, .message h4 {
+            margin: 0.75rem 0 0.5rem 0;
+            color: #e94560;
+        }
+
+        .message h2 { font-size: 1.3rem; }
+        .message h3 { font-size: 1.15rem; }
+        .message h4 { font-size: 1rem; }
+
+        .message strong {
+            color: #fff;
+        }
+
+        .message em {
+            color: #ccc;
+        }
+
+        .input-area {
+            padding: 1rem;
+            border-top: 1px solid #0f3460;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            background: #0f3460;
+            color: #eee;
+            font-size: 1rem;
+        }
+
+        .input-area input:focus {
+            outline: 2px solid #e94560;
+        }
+
+        .input-area button {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            background: #e94560;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .input-area button:hover {
+            background: #c73e54;
+        }
+
+        .input-area button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .sidebar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .panel {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .panel h2 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: #e94560;
+        }
+
+        .config-item {
+            margin-bottom: 1rem;
+        }
+
+        .config-item label {
+            display: block;
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 0.25rem;
+        }
+
+        .config-item input, .config-item select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #0f3460;
+            border-radius: 6px;
+            background: #0f3460;
+            color: #eee;
+            font-size: 0.9rem;
+        }
+
+        .config-item input:focus {
+            outline: 2px solid #e94560;
+        }
+
+        .response-info {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .response-info div {
+            margin-bottom: 0.5rem;
+        }
+
+        .response-info span {
+            color: #4caf50;
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e94560;
+            border-radius: 6px;
+            background: transparent;
+            color: #e94560;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(233, 69, 96, 0.1);
+        }
+
+        .streaming-indicator {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        .streaming-indicator.active {
+            display: flex;
+        }
+
+        .streaming-indicator .dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .streaming-indicator .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #e94560;
+            animation: pulse 1s infinite;
+        }
+
+        .streaming-indicator .dot:nth-child(2) { animation-delay: 0.2s; }
+        .streaming-indicator .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>EchoForge Agent Test UI</h1>
+        <div class="status">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">Connecting...</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="chat-panel">
+            <div class="messages" id="messages">
+                <div class="message system">Welcome! Configure your API key in the sidebar and start chatting.</div>
+            </div>
+            <div class="streaming-indicator" id="streamingIndicator">
+                <div class="dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+                <span>Assistant is typing...</span>
+            </div>
+            <div class="input-area">
+                <input type="text" id="messageInput" placeholder="Type your message..." autocomplete="off">
+                <button id="sendBtn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="panel">
+                <h2>Configuration</h2>
+                <div class="config-item">
+                    <label>Agent API URL</label>
+                    <input type="text" id="apiUrl" value="http://localhost:8004">
+                </div>
+                <div class="config-item">
+                    <label>API Key</label>
+                    <input type="text" id="apiKey" value="efh_test_key_for_integration_testing_only">
+                </div>
+                <div class="config-item">
+                    <label>User ID (for missions)</label>
+                    <input type="text" id="userId" value="5ad6ccc1-44fc-4d3b-92f0-6b047b0ab5a3" placeholder="UUID of CustomerUser">
+                </div>
+                <div class="config-item">
+                    <label>User Name</label>
+                    <input type="text" id="userName" value="Test User">
+                </div>
+                <div class="config-item">
+                    <label>Mode</label>
+                    <select id="streamMode">
+                        <option value="stream">Streaming</option>
+                        <option value="sync">Synchronous</option>
+                    </select>
+                </div>
+                <button class="btn-secondary" onclick="testConnection()">Test Connection</button>
+            </div>
+
+            <div class="panel">
+                <h2>Last Response</h2>
+                <div class="response-info" id="responseInfo">
+                    <div>Status: <span id="lastStatus">-</span></div>
+                    <div>Tokens: <span id="lastTokens">-</span></div>
+                    <div>Time: <span id="lastTime">-</span></div>
+                    <div>Conversation: <span id="conversationId">-</span></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Actions</h2>
+                <button class="btn-secondary" onclick="clearChat()">Clear Chat</button>
+                <button class="btn-secondary" onclick="newConversation()">New Conversation</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let conversationId = null;
+
+        // Initialize
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        function formatMarkdown(content) {
+            // Convert markdown to HTML
+            return content
+                // Code blocks (must come before inline code)
+                .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+                // Inline code
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                // Bold
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                // Italic
+                .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                // Headers
+                .replace(/^### (.+)$/gm, '<h4>$1</h4>')
+                .replace(/^## (.+)$/gm, '<h3>$1</h3>')
+                .replace(/^# (.+)$/gm, '<h2>$1</h2>')
+                // Bullet lists
+                .replace(/^- (.+)$/gm, '• $1')
+                // Numbered lists (keep as-is, just ensure line breaks)
+                // Line breaks
+                .replace(/\n/g, '<br>');
+        }
+
+        function addMessage(content, role) {
+            const messages = document.getElementById('messages');
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+            div.innerHTML = formatMarkdown(content);
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const apiUrl = document.getElementById('apiUrl').value;
+            const apiKey = document.getElementById('apiKey').value;
+            const streamMode = document.getElementById('streamMode').value;
+
+            addMessage(message, 'user');
+            input.value = '';
+
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+
+            const startTime = Date.now();
+
+            try {
+                if (streamMode === 'stream') {
+                    await sendStreamingMessage(apiUrl, apiKey, message, startTime);
+                } else {
+                    await sendSyncMessage(apiUrl, apiKey, message, startTime);
+                }
+            } catch (error) {
+                addMessage(`Error: ${error.message}`, 'system');
+                updateStatus(false);
+            }
+
+            sendBtn.disabled = false;
+        }
+
+        async function sendSyncMessage(apiUrl, apiKey, message, startTime) {
+            const userId = document.getElementById('userId').value;
+            const userName = document.getElementById('userName').value;
+
+            const response = await fetch(`${apiUrl}/v1/chat`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    conversation_id: conversationId,
+                    context: {
+                        user_id: userId || null,
+                        user_name: userName || 'User',
+                    },
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+
+            addMessage(data.response, 'assistant');
+            conversationId = data.conversation_id;
+
+            updateResponseInfo({
+                status: 'success',
+                tokens: data.tokens_used,
+                time: Date.now() - startTime,
+                conversationId: data.conversation_id,
+            });
+            updateStatus(true);
+        }
+
+        async function sendStreamingMessage(apiUrl, apiKey, message, startTime) {
+            const indicator = document.getElementById('streamingIndicator');
+            indicator.classList.add('active');
+
+            const userId = document.getElementById('userId').value;
+            const userName = document.getElementById('userName').value;
+
+            const response = await fetch(`${apiUrl}/v1/chat/stream`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    conversation_id: conversationId,
+                    context: {
+                        user_id: userId || null,
+                        user_name: userName || 'User',
+                    },
+                }),
+            });
+
+            if (!response.ok) {
+                indicator.classList.remove('active');
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let fullContent = '';
+            let messageDiv = null;
+            let tokensUsed = null;
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (line.startsWith('event: ')) {
+                        const eventType = line.substring(7);
+                        continue;
+                    }
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.substring(6));
+
+                            if (data.conversation_id) {
+                                conversationId = data.conversation_id;
+                            }
+
+                            if (data.delta) {
+                                fullContent += data.delta;
+                                if (!messageDiv) {
+                                    const messages = document.getElementById('messages');
+                                    messageDiv = document.createElement('div');
+                                    messageDiv.className = 'message assistant';
+                                    messages.appendChild(messageDiv);
+                                }
+                                // Apply markdown formatting during streaming
+                                messageDiv.innerHTML = formatMarkdown(fullContent);
+                                document.getElementById('messages').scrollTop =
+                                    document.getElementById('messages').scrollHeight;
+                            }
+
+                            if (data.tokens_used) {
+                                tokensUsed = data.tokens_used;
+                            }
+                        } catch (e) {
+                            // Skip invalid JSON
+                        }
+                    }
+                }
+            }
+
+            indicator.classList.remove('active');
+
+            updateResponseInfo({
+                status: 'success',
+                tokens: tokensUsed,
+                time: Date.now() - startTime,
+                conversationId: conversationId,
+            });
+            updateStatus(true);
+        }
+
+        async function testConnection() {
+            const apiUrl = document.getElementById('apiUrl').value;
+
+            try {
+                const response = await fetch(`${apiUrl}/health`);
+                const data = await response.json();
+
+                if (data.status === 'healthy') {
+                    addMessage(`Connected to Agent v${data.version || 'unknown'}`, 'system');
+                    updateStatus(true);
+                } else {
+                    addMessage(`Agent unhealthy: ${JSON.stringify(data)}`, 'system');
+                    updateStatus(false);
+                }
+            } catch (error) {
+                addMessage(`Connection failed: ${error.message}`, 'system');
+                updateStatus(false);
+            }
+        }
+
+        function updateStatus(connected) {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+
+            if (connected) {
+                dot.classList.remove('error');
+                text.textContent = 'Connected';
+            } else {
+                dot.classList.add('error');
+                text.textContent = 'Disconnected';
+            }
+        }
+
+        function updateResponseInfo({ status, tokens, time, conversationId: convId }) {
+            document.getElementById('lastStatus').textContent = status;
+            document.getElementById('lastTokens').textContent = tokens ?
+                `${tokens.input || 0} in / ${tokens.output || 0} out` : '-';
+            document.getElementById('lastTime').textContent = `${time}ms`;
+            document.getElementById('conversationId').textContent = convId || '-';
+        }
+
+        function clearChat() {
+            document.getElementById('messages').innerHTML =
+                '<div class="message system">Chat cleared.</div>';
+        }
+
+        function newConversation() {
+            conversationId = null;
+            addMessage('Started new conversation.', 'system');
+        }
+
+        // Initial connection test
+        setTimeout(testConnection, 500);
+    </script>
+</body>
+</html>

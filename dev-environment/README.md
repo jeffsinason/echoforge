@@ -5,13 +5,21 @@ This directory provides centralized orchestration for the EchoForge development 
 ## Quick Start
 
 ```bash
-# First time setup
-cp .env.example .env
+# First time setup (run ONCE)
+./scripts/setup.sh
+
 # Edit .env to add your ANTHROPIC_API_KEY
+nano .env
 
 # Start everything (recommended)
 ./scripts/start-all.sh
 ```
+
+The setup script will:
+1. Check Python version (3.10+ required)
+2. Create `.env` from `.env.example` if needed
+3. Create virtual environments in `hub/backend/.venv` and `agent/.venv`
+4. Install all dependencies
 
 This single command will:
 1. Start Docker infrastructure (PostgreSQL, Redis)
@@ -69,8 +77,10 @@ dev-environment/
 ├── .env.example            # Template for new developers
 ├── docker-compose.yml      # PostgreSQL + Redis infrastructure
 ├── scripts/
+│   ├── setup.sh            # First-time setup (creates venvs, installs deps)
 │   ├── start-all.sh        # Full stack startup with tmux (recommended)
 │   ├── stop-all.sh         # Stop all services
+│   ├── restart.sh          # Quick restart Hub+Agent
 │   ├── start.sh            # Infrastructure + migrations only
 │   ├── start-hub.sh        # Start Hub server (manual mode)
 │   ├── start-agent.sh      # Start Agent server (manual mode)
@@ -306,15 +316,14 @@ See `.env.example` for the complete list of available variables with description
 **IMPORTANT:** When making changes to the dev-environment scripts or workflow:
 
 1. Update this README with any new commands or changed behavior
-2. Update **both** project CLAUDE.md files to keep them in sync:
-   - `../echoforge-hub/CLAUDE.md` - "Development Environment" section
-   - `../echoforge-agent/CLAUDE.md` - "Development Environment" section
+2. Update **both** component CLAUDE.md files to keep them in sync:
+   - `../hub/CLAUDE.md` - "Development Environment" section
+   - `../agent/CLAUDE.md` - "Development Environment" section
 
-This ensures Claude Code sessions working in either project know how to use the dev environment.
+This ensures Claude Code sessions working in either component know how to use the dev environment.
 
 ## Related Projects
 
-- **echoforge-hub**: Management portal (`../echoforge-hub/`)
-- **echoforge-agent**: AI runtime (`../echoforge-agent/`)
-- **testing**: Integration test UI (`../testing/`)
-- **Specifications**: `../docs/specs/`
+- **Hub**: Management portal (`../hub/`)
+- **Agent**: AI runtime (`../agent/`)
+- **Specifications**: `../specs/`

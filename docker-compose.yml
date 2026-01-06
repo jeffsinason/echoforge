@@ -1,0 +1,45 @@
+# EchoForge Infrastructure
+# Run with: docker compose up -d
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: echoforge_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-echoforge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-echoforge_dev_2025}
+      POSTGRES_DB: ${POSTGRES_DB:-echoforge_hub}
+    ports:
+      - "${POSTGRES_PORT:-5435}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-echoforge}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: echoforge_redis
+    ports:
+      - "${REDIS_PORT:-6382}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  test-ui:
+    image: nginx:alpine
+    container_name: echoforge_test_ui
+    ports:
+      - "${TEST_UI_PORT:-8080}:80"
+    volumes:
+      - ./testing/web-ui:/usr/share/nginx/html:ro
+
+volumes:
+  postgres_data:
+  redis_data:
