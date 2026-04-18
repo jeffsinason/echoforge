@@ -1,0 +1,94 @@
+name: Security concern
+description: Capture a security risk in EchoForge code or infrastructure for triage and later remediation.
+title: "[Security] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for any security risk — discovered exposures, design gaps, or hardening opportunities. Pick the category and severity that best fit; both labels will be auto-applied.
+
+        For an actively exploited vulnerability, do not file here — contact the maintainers directly.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: Which class of security concern is this?
+      options:
+        - "Security:AI Risk"
+        - "Security:Data Leakage"
+        - "Security:Tenant Isolation"
+        - "Security:Auth & Access"
+        - "Security:Injection (classic)"
+        - "Security:Abuse & DoS"
+        - "Security:Privacy & Compliance"
+        - "Security:Supply Chain"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: |
+        - critical — exploitable now with material impact; drop-everything
+        - high — real exposure, fix in next sprint
+        - medium — meaningful risk, plan for an upcoming sprint
+        - low — defense-in-depth or theoretical; fix opportunistically
+      options:
+        - "severity:critical"
+        - "severity:high"
+        - "severity:medium"
+        - "severity:low"
+    validations:
+      required: true
+
+  - type: input
+    id: component
+    attributes:
+      label: Affected component
+      description: File path, service, or subsystem (e.g. `echoforge-hub/backend/apps/agents/triage/classifier.py:29-77`).
+      placeholder: path/to/file.py:lines  or  service-name
+    validations:
+      required: true
+
+  - type: textarea
+    id: concern
+    attributes:
+      label: Concern
+      description: What is the issue, in plain language?
+    validations:
+      required: true
+
+  - type: textarea
+    id: blast_radius
+    attributes:
+      label: Blast radius
+      description: Who or what is exposed, under what role or condition? Be specific about whether this crosses tenant boundaries, what privilege is required, and what the worst realistic outcome is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction or evidence
+      description: Code links, payload examples, log excerpts, or reasoning from a code review. Use file:line references where possible.
+    validations:
+      required: false
+
+  - type: textarea
+    id: mitigation
+    attributes:
+      label: Suggested mitigation
+      description: What would you do to address this if you were acting today? Multiple options welcome.
+    validations:
+      required: false
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: OWASP LLM Top 10 entry, MITRE ATLAS technique, CVE, prior issues, internal docs, etc.
+    validations:
+      required: false
